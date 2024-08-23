@@ -47,6 +47,7 @@ const { navigateTo} = useCustomNavigate();
   const [fabOpacity, setFabOpacity] = useState(1);
   const [additionalDrawerOpen, setAdditionalDrawerOpen] = useState(false);
   const socket = useSocket("https://chat-app-express-seven.vercel.app");
+
   const dispatch = useDispatch<AppDispatch>();
 
   useAuth();
