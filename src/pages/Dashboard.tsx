@@ -21,6 +21,7 @@ import { getChatsHistoryAction } from "../redux/reducers/chatReducer/createChatR
 import useCustomNavigate from "../utils/navigate";
 import { ToastSuccess } from "../utils/toastify";
 import useAuth from "../utils/useAuth";
+import { connectUser} from "../utils/sendBirdService";
 
 const MemoizedSidebar = React.memo(Sidebar);
 const MemoizedChatWindow = React.memo(ChatWindow);
@@ -35,6 +36,8 @@ const userCookie = Cookies.get("user");
 const currentUser = userCookie ? JSON.parse(userCookie) : null;
 
 const Dashboard: React.FC = () => {
+  const socket = useSocket("http://localhost:9200");
+  // const socket = useSocket("https://chat-app-express-seven.vercel.app");
   const theme = useTheme();
   const { loginUser } = useSelector((state: RootState) => state.loginReducer);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -46,16 +49,13 @@ const { navigateTo} = useCustomNavigate();
   const [isPaperVisible, setIsPaperVisible] = useState(true);
   const [fabOpacity, setFabOpacity] = useState(1);
   const [additionalDrawerOpen, setAdditionalDrawerOpen] = useState(false);
-  const socket = useSocket("https://chat-app-express-seven.vercel.app");
-
   const dispatch = useDispatch<AppDispatch>();
-
   useAuth();
   const toggleAdditionalDrawer = () => {
     setAdditionalDrawerOpen((prev) => !prev);
   };
 
-  const handleNewMessage = (message: any) => {
+  const handleNewMessage = useCallback((message: any) => {
     setSelectedChat((prevChat) =>
       prevChat && prevChat.chatRoomId === message.chatRoomId
         ? {
@@ -64,15 +64,14 @@ const { navigateTo} = useCustomNavigate();
           }
         : prevChat
     );
-  }
-
+  },[])
 
   const sendMessage = useCallback(
     async (chatId: string, message: string) => {
       if (!selectedChat) return;
       try {
-        const response = await fetch(
-          `https://chat-app-express-seven.vercel.app/api/chat/${chatId}/message`,
+        // `https://chat-app-express-seven.vercel.app/api/chat/${chatId}/message`,
+        const response = await fetch(`http://localhost:9200/api/chat/${chatId}/message`,
           {
             method: "POST",
             headers: {
@@ -93,13 +92,16 @@ const { navigateTo} = useCustomNavigate();
           senderId: data?.newMessage?.sender,
           receiver: data?.newMessage?.receiver,
         });
+console.log("sending..");
+console.log("selected", selectedChat);
+        
+
       } catch (error) {
         console.error("Error sending message:", error);
       }
     },
     [selectedChat, socket]
   );
-
   const handleViewChange = useCallback(
     (
       newView:
@@ -195,11 +197,19 @@ const { navigateTo} = useCustomNavigate();
       dispatch(getChatsHistoryAction());
   },[dispatch, selectedChat]);
 
-  // useEffect(()=>{
 
-    
-  // },[navigateTo])
-
+  // useEffect(() => {
+  //   const accessToken = Cookies.get("token");
+  //   if (currentUser && accessToken) {
+  //     connectUser(currentUser.id, accessToken)
+  //       .then((user) => {
+  //         console.log("Connected to SendBird:", user);
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error connecting to SendBird:", error);
+  //       });
+  //   }
+  // }, []);
 
   return (
     <Box sx={{ display: "flex", width: "100vw", height: "100vh" }}>
@@ -228,7 +238,7 @@ const { navigateTo} = useCustomNavigate();
               <MemoizedChatWindow
                 selectedChat={selectedChat}
                 sendMessage={sendMessage}
-                socket={socket}
+                // socket={socket}
                 handleNewMessage={handleNewMessage}
               />
             </Box>

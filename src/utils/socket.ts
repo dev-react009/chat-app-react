@@ -8,6 +8,8 @@ const useSocket = (baseURL: string) => {
   useEffect(() => {
     const socketInstance = io(baseURL, {
       transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
     });
     setSocket(socketInstance);
 

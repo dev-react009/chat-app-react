@@ -20,11 +20,9 @@ import {
   Notifications,
   Help,
   Logout,
-  AddCircle,
   ArrowBack,
   Search,
   AccountCircle,
-  ChatBubble,
 
 } from "@mui/icons-material";
 import LogoutDialog from "./LogoutDialog";
@@ -73,7 +71,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     "chats" | "groups" | "settings" | "notifications" | "help" | "logout" |"newChat"| null
   >(null);
   const dispatch = useDispatch<AppDispatch>();
-  const socket = useSocket("https://chat-app-express-seven.vercel.app");
+  // const socket = useSocket("https://chat-app-express-seven.vercel.app");
+  const socket = useSocket("http://localhost:9200");
+
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -136,7 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         receiver: fulfilled.receiver,
       };
 
-      log("Connected to the server");
+      log("Connected to the server1");
       socket?.emit("joinRoom", { chatId: fulfilled?.chatRoomId });
       OnSelectChat(chat);
     } else {

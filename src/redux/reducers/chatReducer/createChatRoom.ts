@@ -50,6 +50,7 @@ const initialState: chatReducer = {
     message:null,
     error:null
   },
+  
 };
 
 

@@ -19,11 +19,12 @@ import { useTheme } from "@mui/material/styles";
 import { MoreVert, Search } from "@mui/icons-material";
 import Cookies from "js-cookie";
 import { Socket } from "socket.io-client";
+import useSocket from "../utils/socket";
 
 interface ChatWindowProps {
   selectedChat: ChatType;
   sendMessage: (chatId: string, message: string) => Promise<void>;
-  socket: Socket | null;
+  // socket: Socket | null;
   handleNewMessage: (message: any) => void;
 }
 
@@ -31,8 +32,9 @@ const userCookie = Cookies.get("user");
 const currentUser = userCookie ? JSON.parse(userCookie) : null;
 
 const ChatWindow: React.FC<ChatWindowProps> = React.memo(
-  ({ selectedChat, sendMessage, socket, handleNewMessage }) => {
+  ({ selectedChat, sendMessage, handleNewMessage }) => {
     const theme = useTheme();
+    const socket = useSocket("http://localhost:9200");
     const [newMessage, setNewMessage] = useState("");
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const [user, setUser] = useState<string | null>(null);
@@ -46,15 +48,15 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
         if (selectedChat && selectedChat?.chatRoomId) {
           socket.emit("joinRoom", {chatId:selectedChat?.chatRoomId});
         }
+
         const handleMessageReceived = (message: any) => {
-      
         handleNewMessage(message);
-        scrollToBottom();
+        scrollToBottom();   
       };
       socket.on("messageReceived", handleMessageReceived);
 
       return () => {
-        socket.emit("leaveRoom", selectedChat?.chatRoomId);
+        // socket.emit("leaveRoom", selectedChat?.chatRoomId);
         socket.off("messageReceived", handleMessageReceived);
       };
     }, [socket, selectedChat, handleNewMessage]);
@@ -93,41 +95,53 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
           backgroundColor: "#ffffff",
         }}
       >
-        {selectedChat && (
-          <AppBar
-            position="static"
-            color="primary"
-            sx={{ mb: 2, backgroundColor: "#1e3a8a", boxShadow: "none" }}
+        {!socket ? (
+          <Typography
+            variant="h6"
+            sx={{ textAlign: "center", marginTop: "50%" }}
           >
-            <Toolbar sx={{ justifyContent: "space-between" }}>
-              <Stack
-                direction={"row"}
-                justifyContent={"start"}
-                alignItems={"center"}
+            Initializing connection...
+          </Typography>
+        ) : (
+          <>
+            {selectedChat && (
+              <AppBar
+                position="static"
+                color="primary"
+                sx={{ mb: 2, backgroundColor: "#1e3a8a", boxShadow: "none" }}
               >
-                <Avatar
-                  src={
-                    selectedChat?.receiver?.avatar ||
-                    "/path/to/default-avatar.jpg"
-                  }
-                  alt={selectedChat?.receiver?.username}
-                  sx={{ width: 30, height: 30, mr: 2 }}
-                />
-                <Typography variant="h6" noWrap sx={{ fontWeight: "bold" }}>
-                  {selectedChat?.receiver?.username || "Chat"}
-                </Typography>
-              </Stack>
-              <Stack direction={"row"}>
-                <IconButton color="inherit">
-                  <Search />
-                </IconButton>
-                <IconButton color="inherit">
-                  <MoreVert />
-                </IconButton>
-              </Stack>
-            </Toolbar>
-          </AppBar>
+                <Toolbar sx={{ justifyContent: "space-between" }}>
+                  <Stack
+                    direction={"row"}
+                    justifyContent={"start"}
+                    alignItems={"center"}
+                  >
+                    <Avatar
+                      src={
+                        selectedChat?.receiver?.avatar ||
+                        "/path/to/default-avatar.jpg"
+                      }
+                      alt={selectedChat?.receiver?.username}
+                      sx={{ width: 30, height: 30, mr: 2 }}
+                    />
+                    <Typography variant="h6" noWrap sx={{ fontWeight: "bold" }}>
+                      {selectedChat?.receiver?.username || "Chat"}
+                    </Typography>
+                  </Stack>
+                  <Stack direction={"row"}>
+                    <IconButton color="inherit">
+                      <Search />
+                    </IconButton>
+                    <IconButton color="inherit">
+                      <MoreVert />
+                    </IconButton>
+                  </Stack>
+                </Toolbar>
+              </AppBar>
+            )}
+          </>
         )}
+
         <Box
           ref={chatContainerRef}
           sx={{
@@ -142,13 +156,15 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
         >
           {selectedChat ? (
             <>
-              {!selectedChat&& <Typography variant="h2" gutterBottom>
-                👋
-              </Typography>}
-            
+              {!selectedChat && (
+                <Typography variant="h2" gutterBottom>
+                  👋
+                </Typography>
+              )}
+
               {selectedChat?.conversation?.map((entry, index) => (
                 <Stack
-                  key={index+"msg"}
+                  key={index + "msg"}
                   direction={"row"}
                   spacing={1}
                   justifyContent={
@@ -175,7 +191,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                       minWidth: isSmallScreen
                         ? "30%"
                         : { sm: "30%", md: "40%", lg: "8%" },
-                      maxWidth: {xs:"85%",sm:"25%"},
+                      maxWidth: { xs: "85%", sm: "25%" },
                       display: "flex",
                       fontWeight: "bold",
                       justifyContent:

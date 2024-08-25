@@ -48,7 +48,7 @@ const LoginPage: React.FC = () => {
       ToastSuccess(fulfilled?.message);
       setFormData(initialValues);
       navigateTo("/dashboard")
-      const expirationTime = new Date(new Date().getTime() + 24 * 60 * 1000);
+      const expirationTime = new Date(new Date().getTime() + 24 * 60* 60 * 1000);
       Cookies.set("token", fulfilled.token, { expires: expirationTime });
       Cookies.set('user',JSON.stringify(fulfilled.data))
     }
