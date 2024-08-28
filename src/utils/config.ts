@@ -1,4 +1,4 @@
-export const baseURL = "https://chat-app-express-seven.vercel.app/api";
+export const baseURL = "https://chat-app-express-tyat.onrender.com/api";
 export const endpoints = {
   LOGIN: "auth/login",
   REGISTER: "auth/register",

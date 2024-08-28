@@ -36,8 +36,8 @@ const userCookie = Cookies.get("user");
 const currentUser = userCookie ? JSON.parse(userCookie) : null;
 
 const Dashboard: React.FC = () => {
-  const socket = useSocket("http://localhost:9200");
-  // const socket = useSocket("https://chat-app-express-seven.vercel.app");
+  // const socket = useSocket("http://localhost:9200");
+  const socket = useSocket("https://chat-app-express-tyat.onrender.com");
   const theme = useTheme();
   const { loginUser } = useSelector((state: RootState) => state.loginReducer);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -71,7 +71,8 @@ const { navigateTo} = useCustomNavigate();
       if (!selectedChat) return;
       try {
         // `https://chat-app-express-seven.vercel.app/api/chat/${chatId}/message`,
-        const response = await fetch(`http://localhost:9200/api/chat/${chatId}/message`,
+        const response = await fetch(
+          `https://chat-app-express-tyat.onrender.com/api/chat/${chatId}/message`,
           {
             method: "POST",
             headers: {

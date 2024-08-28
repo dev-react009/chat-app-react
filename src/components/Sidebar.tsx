@@ -72,7 +72,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   >(null);
   const dispatch = useDispatch<AppDispatch>();
   // const socket = useSocket("https://chat-app-express-seven.vercel.app");
-  const socket = useSocket("http://localhost:9200");
+  // const socket = useSocket("http://localhost:9200");
+  const socket = useSocket("https://chat-app-express-tyat.onrender.com");
+
 
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);

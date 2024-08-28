@@ -34,7 +34,9 @@ const currentUser = userCookie ? JSON.parse(userCookie) : null;
 const ChatWindow: React.FC<ChatWindowProps> = React.memo(
   ({ selectedChat, sendMessage, handleNewMessage }) => {
     const theme = useTheme();
-    const socket = useSocket("http://localhost:9200");
+    // const socket = useSocket("http://localhost:9200");
+  const socket = useSocket("https://chat-app-express-tyat.onrender.com");
+
     const [newMessage, setNewMessage] = useState("");
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const [user, setUser] = useState<string | null>(null);
