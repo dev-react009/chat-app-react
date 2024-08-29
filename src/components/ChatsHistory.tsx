@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import { getFriendChatsAction } from "../redux/reducers/chatReducer/createChatRoom";
 import { log } from "../utils/logger";
+import { formatTimestamp } from "../utils/timeStamp";
 
 interface ChatsHistoryProps {
   onSelectChat: (chat: ChatType) => void;
@@ -68,36 +69,7 @@ const ChatsHistory: React.FC<ChatsHistoryProps> = ({
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
-  const formatTimestamp = (timestamp: string) => {
-  const date = new Date(timestamp);
-  const now = new Date();
-
-  const isToday =
-    date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear();
-
-  const isThisWeek =
-    date >= new Date(now.setDate(now.getDate() - now.getDay())) && 
-    date <= new Date(now.setDate(now.getDate() - now.getDay() + 6));
-
-  if (isToday) {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } else if (isThisWeek) {
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-    });
-  } else {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  }
-};
+ 
 
 
   return (
@@ -164,7 +136,13 @@ const ChatsHistory: React.FC<ChatsHistoryProps> = ({
                 <ChatIcon sx={{ color: "#3f51b5", mr: 2 }} />
                 <ListItemText
                   primary={
-                    <Tooltip title={chat?.participants[0]?.username} arrow>
+                    <Tooltip
+                      title={
+                        chat?.participants[0]?.username.length > 45 &&
+                        chat?.participants[0]?.username
+                      }
+                      arrow
+                    >
                       <Stack direction={"row"} justifyContent={"space-between"}>
                         <Typography
                           variant="body1"
@@ -188,7 +166,13 @@ const ChatsHistory: React.FC<ChatsHistoryProps> = ({
                     </Tooltip>
                   }
                   secondary={
-                    <Tooltip title={chat?.messages[0]?.content} arrow>
+                    <Tooltip
+                      title={
+                        chat?.messages[0]?.content.length > 45 &&
+                        chat?.messages[0]?.content
+                      }
+                      arrow
+                    >
                       <Typography
                         variant="body2"
                         color="textSecondary"

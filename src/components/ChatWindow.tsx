@@ -10,18 +10,22 @@ import {
   useMediaQuery,
   AppBar,
   Toolbar,
+  CircularProgress,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import { ChatType } from "../utils/interface";
 import { useTheme } from "@mui/material/styles";
-import { AddComment, AddCommentOutlined, Chat, MoreVert, Search } from "@mui/icons-material";
+import { AddComment,  MoreVert, Search } from "@mui/icons-material";
 import Cookies from "js-cookie";
 import useSocket from "../utils/socket";
+import { RootState } from "../redux/store";
+import { formatTimestamp } from "../utils/timeStamp";
 
 interface ChatWindowProps {
   selectedChat: ChatType;
+  loading:boolean;
   sendMessage: (chatId: string, message: string) => Promise<void>;
   onCreateNewChat: () => void;
   handleNewMessage: (message: any) => void;
@@ -31,11 +35,16 @@ const userCookie = Cookies.get("user");
 const currentUser = userCookie ? JSON.parse(userCookie) : null;
 
 const ChatWindow: React.FC<ChatWindowProps> = React.memo(
-  ({ selectedChat, sendMessage, handleNewMessage, onCreateNewChat }) => {
+  ({
+    selectedChat,
+    sendMessage,
+    handleNewMessage,
+    onCreateNewChat,
+    loading,
+  }) => {
     const theme = useTheme();
     // const socket = useSocket("http://localhost:9200");
     const socket = useSocket("https://chat-app-express-tyat.onrender.com");
-
     const [newMessage, setNewMessage] = useState("");
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const [user, setUser] = useState<string | null>(null);
@@ -57,7 +66,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
       socket.on("messageReceived", handleMessageReceived);
 
       return () => {
-        // socket.emit("leaveRoom", selectedChat?.chatRoomId);
+        socket.emit("leaveRoom", selectedChat?.chatRoomId);
         socket.off("messageReceived", handleMessageReceived);
       };
     }, [socket, selectedChat, handleNewMessage]);
@@ -173,11 +182,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                       ? "flex-end"
                       : "flex-start"
                   }
-                  alignItems={
-                    entry.sender === currentUser?.userId
-                      ? "flex-end"
-                      : "flex-start"
-                  }
+                  alignItems={"flex-start"}
                   sx={{ mb: 2 }}
                   width={"100%"}
                 >
@@ -187,28 +192,26 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                       alt={selectedChat?.receiver?.username}
                     />
                   )}
+
                   <Box
                     sx={{
-                      padding: 1,
-                      margin: 1,
-                      borderRadius:
-                        entry.sender === currentUser?.userId
-                          ? "25px 25px 0px 30px"
-                          : "0px 25px 25px 25px",
+                      // width:"100%",
+                      textAlign: "left",
+                      borderRadius: "5px",
+                      // entry.sender === currentUser?.userId
+                      //   ? "25px 0px 25px 25px"
+                      //   : "0px 25px 25px 25px",
                       minWidth: isSmallScreen
                         ? "30%"
                         : { sm: "30%", md: "40%", lg: "8%" },
-                      maxWidth: { xs: "85%", sm: "25%", md: "20%" },
+                      maxWidth: { xs: "85%", sm: "20%", md: "20%" },
                       display: "flex",
                       fontWeight: "bold",
-                      justifyContent:
-                        entry.sender !== currentUser?.userId
-                          ? "flex-start"
-                          : "flex-end",
+                      justifyContent: "flex-start",
                       alignItems:
                         entry.sender === currentUser?.userId
                           ? "flex-start"
-                          : "flex-end",
+                          : "flex-start",
                       backgroundColor:
                         entry.sender === currentUser?.userId
                           ? "#1e3a8a"
@@ -220,14 +223,29 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                       position: "relative",
                       wordBreak: "break-word",
                       boxShadow: 1,
+                      p: 0.2,
                     }}
                   >
-                    <Typography
-                      variant="body2"
-                      sx={{ fontSize: "13px", pl: 1, pr: 1 }}
-                    >
-                      {entry.content}
-                    </Typography>
+                    <Stack direction={"column"} width={"100%"}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontSize: "13px", pl: 1,pr:1,whiteSpace: "pre-wrap" }}
+                      >
+                        {entry.content}
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          color: "inherit",
+                          fontSize: "10px",
+                          display: "flex",
+                          alignSelf: "end",
+                          pr: 1,
+                        }}
+                      >
+                        {formatTimestamp(entry.timestamp)}
+                      </Typography>
+                    </Stack>
                   </Box>
                   {entry.sender === currentUser?.userId && (
                     <Avatar
@@ -279,10 +297,14 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
               placeholder="Type a message"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              multiline
+              minRows={1}
+              maxRows={3}
               sx={{
                 backgroundColor: "#ffffff",
                 borderRadius: 2,
-                zIndex: 2, //
+                borderColor: "#1e3a8a",
+                zIndex: 2,
               }}
               InputProps={{
                 startAdornment: (
@@ -301,91 +323,21 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                       disabled={newMessage === ""}
                       onClick={handleSendMessage}
                     >
-                      <SendIcon
-                        sx={{
-                          color: newMessage === "" ? "#d3d3d3" : "#1e3a8a",
-                        }}
-                      />
+                      {loading ? (
+                        <CircularProgress size={"30px"} />
+                      ) : (
+                        <SendIcon
+                          sx={{
+                            color: newMessage === "" ? "#d3d3d3" : "#1e3a8a",
+                          }}
+                        />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
             />
           </Box>
-          // <Box
-          //   sx={{
-          //     position: "relative",
-          //     zIndex: 2,
-          //     backgroundColor: "#f0f0f0",
-          //   }}
-          // >
-          //   <Box
-          //     sx={{
-          //       display: "flex",
-          //       alignItems: "center", // Vertically centers the textarea
-          //       height: "100%", // Ensure the textarea container takes full height
-          //     }}
-          //   >
-          //     <textarea
-          //       rows={3}
-          //       placeholder="Type a message"
-          //       value={newMessage}
-          //       onChange={(e) => setNewMessage(e.target.value)}
-          //       style={{
-          //         width: "100%",
-          //         borderRadius: "8px",
-          //         padding: "10px 65px 10px 50px",
-          //         backgroundColor: "#ffffff",
-          //         border: "1px solid #d3d3d3",
-          //         resize: "none", // Prevent resizing
-          //         fontFamily: "inherit",
-          //         fontSize: "16px",
-          //         lineHeight: "1.2",
-          //         textAlign: "left", // Center text horizontally
-          //         display: "flex",
-          //         alignItems: "center",
-          //         height: "70px", // Adjust height to match line height
-          //         boxSizing: "border-box",
-          //       }}
-          //     />
-          //   </Box>
-          //   <Box
-          //     sx={{
-          //       position: "absolute",
-          //       top: "50%",
-          //       left: "8px",
-          //       transform: "translateY(-50%)",
-          //     }}
-          //   >
-          //     <IconButton color="default">
-          //       <EmojiEmotionsIcon />
-          //     </IconButton>
-          //   </Box>
-          //   <Box
-          //     sx={{
-          //       position: "absolute",
-          //       top: "50%",
-          //       right: "8px",
-          //       transform: "translateY(-50%)",
-          //       display: "flex",
-          //       alignItems: "center",
-          //     }}
-          //   >
-          //     <IconButton color="default">
-          //       <AttachFileIcon />
-          //     </IconButton>
-          //     <IconButton
-          //       disabled={newMessage === ""}
-          //       onClick={handleSendMessage}
-          //     >
-          //       <SendIcon
-          //         sx={{
-          //           color: newMessage === "" ? "#d3d3d3" : "#1e3a8a",
-          //         }}
-          //       />
-          //     </IconButton>
-          //   </Box>
-          // </Box>
         )}
       </Box>
     );

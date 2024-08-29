@@ -31,23 +31,24 @@ const MemoizedHelp = React.memo(Help);
 const MemoizedSettings = React.memo(Settings);
 const MemoizedNotifications = React.memo(Notifications);
 
-const userCookie = Cookies.get("user");
-const currentUser = userCookie ? JSON.parse(userCookie) : null;
+// const userCookie = Cookies.get("user");
+// const currentUser = userCookie ? JSON.parse(userCookie) : null;
 
 const Dashboard: React.FC = () => {
   // const socket = useSocket("http://localhost:9200");
   const socket = useSocket("https://chat-app-express-tyat.onrender.com");
   const theme = useTheme();
-  const { loginUser } = useSelector((state: RootState) => state.loginReducer);
+  // const { loginUser } = useSelector((state: RootState) => state.loginReducer);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
-const { navigateTo} = useCustomNavigate(); 
+  const { navigateTo} = useCustomNavigate(); 
   const [view, setView] = useState<
-    "chats" | "groups" | "settings" | "notifications" | "help" | "logout"| "newChat"
+  "chats" | "groups" | "settings" | "notifications" | "help" | "logout"| "newChat"
   >("chats");
   const [selectedChat, setSelectedChat] = useState<ChatType | null>(null);
   const [isPaperVisible, setIsPaperVisible] = useState(isSmallScreen?false:true);
   const [fabOpacity, setFabOpacity] = useState(1);
   const [additionalDrawerOpen, setAdditionalDrawerOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   useAuth();
   const toggleAdditionalDrawer = () => {
@@ -68,8 +69,8 @@ const { navigateTo} = useCustomNavigate();
   const sendMessage = useCallback(
     async (chatId: string, message: string) => {
       if (!selectedChat) return;
+      setLoading(true);
       try {
-      
         const response = await fetch(
           // `http://localhost:9200/api/chat/${chatId}/message`,
           `https://chat-app-express-tyat.onrender.com/api/chat/${chatId}/message`,
@@ -88,20 +89,18 @@ const { navigateTo} = useCustomNavigate();
         );
 
         const data = await response.json();
-        
+
         socket?.emit("sendMessage", {
           chatRoomId: chatId,
           content: data?.newMessage?.content,
           senderId: data?.newMessage?.sender,
           receiver: data?.newMessage?.receiver,
         });
-console.log("sending..");
-console.log("selected", selectedChat);
-        
-
       } catch (error) {
         console.error("Error sending message:", error);
-      }
+      } finally {
+        setLoading(false); 
+    }
     },
     [selectedChat, socket]
   );
@@ -235,7 +234,7 @@ console.log("selected", selectedChat);
               <MemoizedChatWindow
                 selectedChat={selectedChat}
                 sendMessage={sendMessage}
-                // socket={socket}
+                loading ={loading}
                 onCreateNewChat={toggleAdditionalDrawer}
                 handleNewMessage={handleNewMessage}
               />
