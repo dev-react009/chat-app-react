@@ -17,6 +17,8 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<IErrors>(values);
   const {navigateTo} = useCustomNavigate();
+  const [loading, setLoading] = useState(false);
+
   const validateField = (name: string, value: string) => {
     let error = "";
     switch (name) {
@@ -44,6 +46,7 @@ const LoginPage: React.FC = () => {
     event.preventDefault();
     const response = await dispatch(loginAction(formData));
     const fulfilled = response.payload;
+    console.log(fulfilled)
     if (fulfilled.status)  {
       ToastSuccess(fulfilled?.message);
       setFormData(initialValues);
@@ -55,7 +58,6 @@ const LoginPage: React.FC = () => {
     else{
       ToastError(fulfilled?.error)
     };
-
   };
   return (
     <Grid
@@ -86,7 +88,7 @@ const LoginPage: React.FC = () => {
         }}
       >
         <AuthForm
-          title="Ready to Connect? Enter Here"
+          title="Join the conversation the never ends"
           isLogin
           onSubmit={handleLoginSubmit}
           formData={formData}

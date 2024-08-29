@@ -24,7 +24,7 @@ const ForgotPasswordScreen = () => {
         setIsSending(true);
     const response = await dispatch(forgotPasswordAction({email}));
     const fulfilled = response.payload;
-log(fulfilled)
+    log(fulfilled)
     if (fulfilled.status === true) {
         ToastSuccess(fulfilled.message);
       setTimeout(() => {

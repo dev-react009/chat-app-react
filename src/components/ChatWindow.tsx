@@ -16,15 +16,14 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import { ChatType } from "../utils/interface";
 import { useTheme } from "@mui/material/styles";
-import { MoreVert, Search } from "@mui/icons-material";
+import { AddComment, AddCommentOutlined, Chat, MoreVert, Search } from "@mui/icons-material";
 import Cookies from "js-cookie";
-import { Socket } from "socket.io-client";
 import useSocket from "../utils/socket";
 
 interface ChatWindowProps {
   selectedChat: ChatType;
   sendMessage: (chatId: string, message: string) => Promise<void>;
-  // socket: Socket | null;
+  onCreateNewChat: () => void;
   handleNewMessage: (message: any) => void;
 }
 
@@ -32,28 +31,28 @@ const userCookie = Cookies.get("user");
 const currentUser = userCookie ? JSON.parse(userCookie) : null;
 
 const ChatWindow: React.FC<ChatWindowProps> = React.memo(
-  ({ selectedChat, sendMessage, handleNewMessage }) => {
+  ({ selectedChat, sendMessage, handleNewMessage, onCreateNewChat }) => {
     const theme = useTheme();
     // const socket = useSocket("http://localhost:9200");
-  const socket = useSocket("https://chat-app-express-tyat.onrender.com");
+    const socket = useSocket("https://chat-app-express-tyat.onrender.com");
 
     const [newMessage, setNewMessage] = useState("");
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const [user, setUser] = useState<string | null>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
-    
+
     useEffect(() => {
       if (!socket) {
         console.warn("Socket is not initialized");
         return;
       }
-        if (selectedChat && selectedChat?.chatRoomId) {
-          socket.emit("joinRoom", {chatId:selectedChat?.chatRoomId});
-        }
+      if (selectedChat && selectedChat?.chatRoomId) {
+        socket.emit("joinRoom", { chatId: selectedChat?.chatRoomId });
+      }
 
-        const handleMessageReceived = (message: any) => {
+      const handleMessageReceived = (message: any) => {
         handleNewMessage(message);
-        scrollToBottom();   
+        scrollToBottom();
       };
       socket.on("messageReceived", handleMessageReceived);
 
@@ -62,7 +61,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
         socket.off("messageReceived", handleMessageReceived);
       };
     }, [socket, selectedChat, handleNewMessage]);
-    
+
     const handleSendMessage = () => {
       if (selectedChat) {
         sendMessage(selectedChat?.chatRoomId, newMessage);
@@ -87,7 +86,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
       scrollToBottom();
     }, [selectedChat?.conversation]);
 
-
+    console.log(selectedChat?.conversation);
     return (
       <Box
         sx={{
@@ -170,16 +169,22 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                   direction={"row"}
                   spacing={1}
                   justifyContent={
-                    entry.sender === user ? "flex-end" : "flex-start"
+                    entry.sender === currentUser?.userId
+                      ? "flex-end"
+                      : "flex-start"
                   }
-                  alignItems={entry.sender === user ? "flex-end" : "flex-start"}
+                  alignItems={
+                    entry.sender === currentUser?.userId
+                      ? "flex-end"
+                      : "flex-start"
+                  }
                   sx={{ mb: 2 }}
                   width={"100%"}
                 >
-                  {entry.sender !== user && (
+                  {entry.sender !== currentUser?.userId && (
                     <Avatar
                       src={entry?.avatar || "/path/to/default-avatar.jpg"}
-                      alt={"a"}
+                      alt={selectedChat?.receiver?.username}
                     />
                   )}
                   <Box
@@ -187,22 +192,31 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                       padding: 1,
                       margin: 1,
                       borderRadius:
-                        entry.sender === user
+                        entry.sender === currentUser?.userId
                           ? "25px 25px 0px 30px"
                           : "0px 25px 25px 25px",
                       minWidth: isSmallScreen
                         ? "30%"
                         : { sm: "30%", md: "40%", lg: "8%" },
-                      maxWidth: { xs: "85%", sm: "25%" },
+                      maxWidth: { xs: "85%", sm: "25%", md: "20%" },
                       display: "flex",
                       fontWeight: "bold",
                       justifyContent:
-                        entry.sender !== user ? "flex-start" : "flex-end",
+                        entry.sender !== currentUser?.userId
+                          ? "flex-start"
+                          : "flex-end",
                       alignItems:
-                        entry.sender === user ? "flex-start" : "flex-end",
+                        entry.sender === currentUser?.userId
+                          ? "flex-start"
+                          : "flex-end",
                       backgroundColor:
-                        entry.sender === user ? "#1e3a8a" : "#ffffff",
-                      color: entry.sender === user ? "#ffffff" : "#000000",
+                        entry.sender === currentUser?.userId
+                          ? "#1e3a8a"
+                          : "#ffffff",
+                      color:
+                        entry.sender === currentUser?.userId
+                          ? "#ffffff"
+                          : "#000000",
                       position: "relative",
                       wordBreak: "break-word",
                       boxShadow: 1,
@@ -215,11 +229,11 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                       {entry.content}
                     </Typography>
                   </Box>
-                  {entry.sender === user && (
+                  {entry.sender === currentUser?.userId && (
                     <Avatar
                       //avatar
                       src={"/path/to/default-avatar.jpg"}
-                      alt={selectedChat.receiver.username}
+                      alt={currentUser.username}
                     />
                   )}
                 </Stack>
@@ -227,19 +241,38 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
             </>
           ) : (
             <Stack
-              direction={"row"}
+              direction={"column"}
               justifyContent={"center"}
               alignItems={"center"}
-              height={"50vh"}
+              width={"100%"}
+              height={"70vh"}
             >
-              <Typography variant="h6" gutterBottom>
-                Select a chat to start messaging
+              <Typography variant="h6" gutterBottom color={"#2f2f2f"}>
+                Hello,
+                <Box component={"span"} color={"#1e3a8a"} fontWeight={"bold"}>
+                  {`${currentUser.username}!`}
+                </Box>
+                ! Ready to start a new chat? Just select a friend!
               </Typography>
+              {isSmallScreen && (
+                <Box
+                  display={"flex"}
+                  justifyContent={"center"}
+                  alignItems={"center"}
+                  mt={5}
+                  onClick={onCreateNewChat}
+                >
+                  <AddComment sx={{ fontSize: "50px", color: "#1e3a8a" }} />
+                </Box>
+              )}
             </Stack>
           )}
         </Box>
         {selectedChat && (
-          <Box sx={{ padding: 1, backgroundColor: "#f0f0f0" }}>
+          <Box
+            component={"form"}
+            sx={{ padding: 1, backgroundColor: "#f0f0f0" }}
+          >
             <TextField
               fullWidth
               variant="outlined"
@@ -249,7 +282,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
               sx={{
                 backgroundColor: "#ffffff",
                 borderRadius: 2,
-                zIndex: 2, // Ensure it's above other elements
+                zIndex: 2, //
               }}
               InputProps={{
                 startAdornment: (
@@ -279,6 +312,80 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
               }}
             />
           </Box>
+          // <Box
+          //   sx={{
+          //     position: "relative",
+          //     zIndex: 2,
+          //     backgroundColor: "#f0f0f0",
+          //   }}
+          // >
+          //   <Box
+          //     sx={{
+          //       display: "flex",
+          //       alignItems: "center", // Vertically centers the textarea
+          //       height: "100%", // Ensure the textarea container takes full height
+          //     }}
+          //   >
+          //     <textarea
+          //       rows={3}
+          //       placeholder="Type a message"
+          //       value={newMessage}
+          //       onChange={(e) => setNewMessage(e.target.value)}
+          //       style={{
+          //         width: "100%",
+          //         borderRadius: "8px",
+          //         padding: "10px 65px 10px 50px",
+          //         backgroundColor: "#ffffff",
+          //         border: "1px solid #d3d3d3",
+          //         resize: "none", // Prevent resizing
+          //         fontFamily: "inherit",
+          //         fontSize: "16px",
+          //         lineHeight: "1.2",
+          //         textAlign: "left", // Center text horizontally
+          //         display: "flex",
+          //         alignItems: "center",
+          //         height: "70px", // Adjust height to match line height
+          //         boxSizing: "border-box",
+          //       }}
+          //     />
+          //   </Box>
+          //   <Box
+          //     sx={{
+          //       position: "absolute",
+          //       top: "50%",
+          //       left: "8px",
+          //       transform: "translateY(-50%)",
+          //     }}
+          //   >
+          //     <IconButton color="default">
+          //       <EmojiEmotionsIcon />
+          //     </IconButton>
+          //   </Box>
+          //   <Box
+          //     sx={{
+          //       position: "absolute",
+          //       top: "50%",
+          //       right: "8px",
+          //       transform: "translateY(-50%)",
+          //       display: "flex",
+          //       alignItems: "center",
+          //     }}
+          //   >
+          //     <IconButton color="default">
+          //       <AttachFileIcon />
+          //     </IconButton>
+          //     <IconButton
+          //       disabled={newMessage === ""}
+          //       onClick={handleSendMessage}
+          //     >
+          //       <SendIcon
+          //         sx={{
+          //           color: newMessage === "" ? "#d3d3d3" : "#1e3a8a",
+          //         }}
+          //       />
+          //     </IconButton>
+          //   </Box>
+          // </Box>
         )}
       </Box>
     );

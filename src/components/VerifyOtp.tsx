@@ -11,24 +11,28 @@ import { Stack,Box, TextField, Button, Typography, Grid } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { ArrowBackIosNew } from "@mui/icons-material";
 import useCustomNavigate from "../utils/navigate";
-import { ToastError } from "../utils/toastify";
-import { verifyOTPAction } from "../redux/reducers/auth/login/loginReducer";
+import { ToastError, ToastSuccess } from "../utils/toastify";
+import { forgotPasswordAction, verifyOTPAction } from "../redux/reducers/auth/login/loginReducer";
 import { log } from "../utils/logger";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import { toast } from "react-toastify";
 
 const VerifyOtpScreen = () => {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
-  const [timer, setTimer] = useState(10); // countdown timer
+  const dispatch = useDispatch<AppDispatch>();
+  const [timer, setTimer] = useState(60); // countdown timer
   const inputRefs = useRef<HTMLInputElement[]>([]);
 const {state} = useLocation();
 const {navigateTo} = useCustomNavigate();
-log(state)
+// log(state)
   useEffect(() => {
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
     };
-   
   }, []);
 
+      
 
     useEffect(() => {
       // Handle countdown timer
@@ -78,7 +82,6 @@ log(state)
       }
     }
   };
-log(state)
 
   const handleInputClick=(index:number)=>{
     if(index>0 && inputRefs.current[index-1] ){
@@ -105,9 +108,23 @@ log(state)
 
   const handleResendOtp = async() => {
     // Resend OTP logic
-    // const response
-    console.log("Resending OTP...");
-    setTimer(10);
+    const {email} =state
+    if (email !== "") {
+      const response = await dispatch(forgotPasswordAction( {email}));
+      const fulfilled = response.payload;
+      log(fulfilled);
+      if (fulfilled.status === true) {
+        ToastSuccess(fulfilled.message);
+        setTimeout(() => {
+          navigateTo("/verifyOTP", { email });
+        }, 500);
+      } else {
+        ToastError(fulfilled.error);
+      }
+    } else {
+      toast.warning("Email Field Cannot be empty");
+    }
+    setTimer(60);
   };
 
   return (

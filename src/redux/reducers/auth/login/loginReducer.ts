@@ -1,16 +1,16 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { authState, userData } from "../../../../utils/interface";
+import { loginState, userData } from "../../../../utils/interface";
 import { loginUser, requestOTP, resetPasswordWithOTP } from "./loginAPI";
 
-const initialState: authState = {
-  loading: "initial",
+const initialState: loginState = {
+  loadingAction: "initial",
   error: null,
   success: false,
   message: null,
-  loginUser:{
+  loginUser: {
     email: null,
-    username:null,
-    userId:null
+    username: null,
+    userId: null,
   },
 };
 export const loginAction = createAsyncThunk(
@@ -59,58 +59,58 @@ const loginSlice = createSlice({
   extraReducers:(builder)=>{
     builder
       .addCase(loginAction.pending, (state) => {
-        state.loading = "pending";
+        state.loadingAction = "pending";
         state.message = null;
         state.error = null;
         state.success = false;
       })
       .addCase(loginAction.fulfilled, (state, action) => {
-        state.loading = "success";
+        state.loadingAction = "success";
         state.message = null;
         state.error = null;
         state.success = true;
         state.loginUser= action.payload?.data
       })
       .addCase(loginAction.rejected, (state, action) => {
-        state.loading = "reject";
+        state.loadingAction = "reject";
         state.message = null;
         state.error = null;
         state.success = false;
       })
       //forgotPasswordAction
       .addCase(forgotPasswordAction.pending, (state) => {
-        state.loading = "pending";
+        state.loadingAction = "pending";
         state.message = null;
         state.error = null;
         state.success = false;
       })
       .addCase(forgotPasswordAction.fulfilled, (state, action) => {
-        state.loading = "success";
+        state.loadingAction = "success";
         state.message = null;
         state.error = null;
         state.success = true;
       })
       .addCase(forgotPasswordAction.rejected, (state, action) => {
-        state.loading = "reject";
+        state.loadingAction = "reject";
         state.message = null;
         state.error = null;
         state.success = false;
       })
     // verifyOTPAction
     .addCase(verifyOTPAction.pending, (state) => {
-        state.loading = "pending";
+        state.loadingAction = "pending";
         state.message = null;
         state.error = null;
         state.success = false;
       })
       .addCase(verifyOTPAction.fulfilled, (state, action) => {
-        state.loading = "success";
+        state.loadingAction = "success";
         state.message = null;
         state.error = null;
         state.success = true;
       })
       .addCase(verifyOTPAction.rejected, (state, action) => {
-        state.loading = "reject";
+        state.loadingAction = "reject";
         state.message = null;
         state.error = null;
         state.success = false; 

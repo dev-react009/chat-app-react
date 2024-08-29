@@ -51,11 +51,19 @@ export interface authState{
   loading: "initial"|"pending"|"success"|"reject",
   success: boolean,
   error:null,
-  loginUser?:{
-    userId:string | null,
-    email:string| null,
-    username:string | null
-  }| null
+
+}
+
+export interface loginState {
+  message: null;
+  loadingAction: "initial" | "pending" | "success" | "reject";
+  success: boolean;
+  error: null;
+  loginUser?: {
+    userId: string | null;
+    email: string | null;
+    username: string | null;
+  } | null;
 }
 
 export interface IErrors{

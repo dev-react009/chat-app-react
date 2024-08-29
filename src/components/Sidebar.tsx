@@ -39,10 +39,11 @@ import { log } from "../utils/logger";
 interface SidebarProps {
   open: boolean;
   isSmallScreen: boolean;
-  additionalDrawerOpen:boolean;
+  additionalDrawerOpen: boolean;
   OnSelectChat: (Chat: ChatType) => void;
-  toggleAdditionalDrawer:()=> void;
+  toggleAdditionalDrawer: () => void;
   onLogout: () => void;
+  PaperVisibilityClose: () => void;
 
   viewChange: (
     newView:
@@ -64,17 +65,23 @@ const Sidebar: React.FC<SidebarProps> = ({
   viewChange,
   OnSelectChat,
   onLogout,
+  PaperVisibilityClose,
 }) => {
   const userCookie = Cookies.get("user");
   const userData = userCookie ? JSON.parse(userCookie) : null;
   const [activeItem, setActiveItem] = useState<
-    "chats" | "groups" | "settings" | "notifications" | "help" | "logout" |"newChat"| null
+    | "chats"
+    | "groups"
+    | "settings"
+    | "notifications"
+    | "help"
+    | "logout"
+    | "newChat"
+    | null
   >(null);
   const dispatch = useDispatch<AppDispatch>();
-  // const socket = useSocket("https://chat-app-express-seven.vercel.app");
   // const socket = useSocket("http://localhost:9200");
   const socket = useSocket("https://chat-app-express-tyat.onrender.com");
-
 
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
@@ -84,7 +91,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [message, setMessage] = useState("No Data Found");
   const [friendsList, setFriendsList] = useState<friendsList>([]);
   const handleItemClick = (
-    view: "chats" | "groups" | "settings" | "notifications" | "help" | "logout" |"newChat"
+    view:
+      | "chats"
+      | "groups"
+      | "settings"
+      | "notifications"
+      | "help"
+      | "logout"
+      | "newChat"
   ) => {
     setActiveItem(view);
     switch (view) {
@@ -117,7 +131,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     onLogout();
   };
 
-  
   const toggleProfileDrawer = () => {
     setProfileDrawerOpen((prev) => !prev);
   };
@@ -138,9 +151,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         receiver: fulfilled.receiver,
       };
 
-      log("Connected to the server1");
+      log("Connected to the server---");
       socket?.emit("joinRoom", { chatId: fulfilled?.chatRoomId });
       OnSelectChat(chat);
+      setTimeout(() => {
+        toggleAdditionalDrawer();
+        PaperVisibilityClose();
+      }, 0);
     } else {
       ToastError(fulfilled.message);
     }
@@ -182,8 +199,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       }
     }, 1000);
 
-    return () => clearTimeout(delayDebounceFn); 
-   }, [socket, searchTerm]);
+    return () => clearTimeout(delayDebounceFn);
+  }, [socket, searchTerm]);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -207,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     };
     fetchFriends();
   }, []);
-  
+
   const getAllFriendsList = async () => {
     const response = await fetch(
       `${baseURL}/${endpoints.GET_FRIENDS_LIST}?userId=${userData?.userId!}`,
@@ -217,7 +234,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           "Content-Type": "application/json",
           Authorization: `Bearer ${Cookies.get("token")}`,
         },
-    }
+      }
     );
     return response;
   };
@@ -250,7 +267,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               Chats
             </Typography>
             <IconButton color="inherit" onClick={toggleAdditionalDrawer}>
-              <Chat/>
+              <Chat />
             </IconButton>
           </Stack>
         )}
@@ -470,6 +487,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}
         </List>
       </Drawer>
+
       {/* Profile Drawer */}
       <Drawer
         anchor="left"

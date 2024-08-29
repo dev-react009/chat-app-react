@@ -16,7 +16,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import HelpIcon from "@mui/icons-material/Help";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { AddCircleOutline, AddComment, AddIcCallTwoTone } from "@mui/icons-material";
+import { AddComment } from "@mui/icons-material";
 
 interface NavbarProps {
   onMenuClick: (

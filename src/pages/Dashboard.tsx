@@ -21,7 +21,6 @@ import { getChatsHistoryAction } from "../redux/reducers/chatReducer/createChatR
 import useCustomNavigate from "../utils/navigate";
 import { ToastSuccess } from "../utils/toastify";
 import useAuth from "../utils/useAuth";
-import { connectUser} from "../utils/sendBirdService";
 
 const MemoizedSidebar = React.memo(Sidebar);
 const MemoizedChatWindow = React.memo(ChatWindow);
@@ -46,7 +45,7 @@ const { navigateTo} = useCustomNavigate();
     "chats" | "groups" | "settings" | "notifications" | "help" | "logout"| "newChat"
   >("chats");
   const [selectedChat, setSelectedChat] = useState<ChatType | null>(null);
-  const [isPaperVisible, setIsPaperVisible] = useState(true);
+  const [isPaperVisible, setIsPaperVisible] = useState(isSmallScreen?false:true);
   const [fabOpacity, setFabOpacity] = useState(1);
   const [additionalDrawerOpen, setAdditionalDrawerOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
@@ -70,9 +69,11 @@ const { navigateTo} = useCustomNavigate();
     async (chatId: string, message: string) => {
       if (!selectedChat) return;
       try {
-        // `https://chat-app-express-seven.vercel.app/api/chat/${chatId}/message`,
+      
         const response = await fetch(
+          // `http://localhost:9200/api/chat/${chatId}/message`,
           `https://chat-app-express-tyat.onrender.com/api/chat/${chatId}/message`,
+
           {
             method: "POST",
             headers: {
@@ -87,6 +88,7 @@ const { navigateTo} = useCustomNavigate();
         );
 
         const data = await response.json();
+        
         socket?.emit("sendMessage", {
           chatRoomId: chatId,
           content: data?.newMessage?.content,
@@ -126,6 +128,11 @@ console.log("selected", selectedChat);
     setFabOpacity(1);
   }, []);
 
+  const PaperVisibilityClose = useCallback(()=>{
+    setIsPaperVisible(false);
+    setFabOpacity(1);
+  },[])
+
   const onSelectChat = useCallback(
     (chat: ChatType) => {
       if (chat?.chatRoomId === selectedChat?.chatRoomId) {
@@ -158,10 +165,11 @@ console.log("selected", selectedChat);
     () => ({
       open: !isSmallScreen,
       isSmallScreen,
+      additionalDrawerOpen,
       viewChange: handleViewChange,
       OnSelectChat: onSelectChat,
       onLogout: handleLogout,
-      additionalDrawerOpen,
+      PaperVisibilityClose,
       toggleAdditionalDrawer: toggleAdditionalDrawer,
     }),
     [
@@ -169,6 +177,7 @@ console.log("selected", selectedChat);
       handleViewChange,
       onSelectChat,
       handleLogout,
+      PaperVisibilityClose,
       additionalDrawerOpen,
     ]
   );
@@ -199,19 +208,6 @@ console.log("selected", selectedChat);
   },[dispatch, selectedChat]);
 
 
-  // useEffect(() => {
-  //   const accessToken = Cookies.get("token");
-  //   if (currentUser && accessToken) {
-  //     connectUser(currentUser.id, accessToken)
-  //       .then((user) => {
-  //         console.log("Connected to SendBird:", user);
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error connecting to SendBird:", error);
-  //       });
-  //   }
-  // }, []);
-
   return (
     <Box sx={{ display: "flex", width: "100vw", height: "100vh" }}>
       <MemoizedSidebar {...sidebarProps} />
@@ -240,6 +236,7 @@ console.log("selected", selectedChat);
                 selectedChat={selectedChat}
                 sendMessage={sendMessage}
                 // socket={socket}
+                onCreateNewChat={toggleAdditionalDrawer}
                 handleNewMessage={handleNewMessage}
               />
             </Box>
@@ -273,7 +270,7 @@ console.log("selected", selectedChat);
               {view === "notifications" && <MemoizedNotifications />}
             </Paper>
 
-            {isPaperVisible && (
+            
               <Fab
                 onClick={togglePaperVisibility}
                 sx={{
@@ -297,7 +294,7 @@ console.log("selected", selectedChat);
               >
                 {isPaperVisible ? <ArrowBackIcon /> : <ArrowForwardIcon />}
               </Fab>
-            )}
+            
           </Box>
         </Box>
         {isSmallScreen && (

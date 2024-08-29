@@ -8,7 +8,6 @@ import {
   Stack,
 } from "@mui/material";
 import { IErrors, IFormData } from "../utils/interface";
-import { useNavigate } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useSelector } from "react-redux";
@@ -37,17 +36,16 @@ const AuthForm: React.FC<AuthFormProps> = ({
   handleClickShowPassword,
 }) => {
   const { loading } = useSelector((state: RootState) => state.registerReducer);
+  const {loadingAction} = useSelector((state:RootState)=>state.loginReducer)
 
-  // const navigate = useNavigate();
   const { navigateTo } = useCustomNavigate();
   const handleToggle = () => {
     isLogin ? navigateTo("/reg") : navigateTo("/");
   };
 
-  const handleNavigate=()=>{
+  const handleNavigate = () => {
     navigateTo("/forgot");
-  }
-
+  };
   return (
     <Box
       component="form"
@@ -76,7 +74,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
         },
       }}
     >
-      <Stack direction="column" alignItems="flex-start" width={'100%'}>
+      <Stack direction="column" alignItems="flex-start" width={"100%"}>
         <Typography
           variant="h4"
           color="white"
@@ -85,7 +83,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
           fontSize="15px"
           gutterBottom
           my={1}
-          textAlign={'justify'}
+          textAlign={"justify"}
         >
           {title}
         </Typography>
@@ -195,6 +193,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
         fullWidth
         variant="contained"
         color="primary"
+        disabled={loadingAction===("pending" || "reject") }
         sx={{
           mt: 2,
           mb: 2,
@@ -214,7 +213,13 @@ const AuthForm: React.FC<AuthFormProps> = ({
           },
         }}
       >
-        {isLogin ? "Access Your Account" : "JoinNow"}
+        {(loadingAction==="pending") ? (
+          <Typography color={"inherit"}>Loading ...</Typography>
+        ) : isLogin ? (
+          "Access Your Account"
+        ) : (
+          "JoinNow"
+        )}
       </Button>
       {isLogin ? (
         <Typography
@@ -278,6 +283,8 @@ const inputStyles = {
     color: "rgba(255, 255, 255, 1)",
   },
 };
+
+
 
 const styles = {
   authFormHelperText: {
