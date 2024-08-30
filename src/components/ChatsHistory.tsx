@@ -43,7 +43,7 @@ const ChatsHistory: React.FC<ChatsHistoryProps> = ({
     } else {
       const filtered = getRecentChats?.chats?.filter((chat) =>
         chat.participants.some((participant) =>
-          participant.username.toLowerCase().includes(searchTerm.toLowerCase())
+          participant?.username?.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
       setFilteredChats(filtered);

@@ -273,7 +273,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                     <Avatar
                       //avatar
                       src={"/path/to/default-avatar.jpg"}
-                      alt={currentUser.username}
+                      alt={currentUser?.username}
                     />
                   )}
                 </Stack>
@@ -290,7 +290,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
               <Typography variant="h6" gutterBottom color={"#2f2f2f"}>
                 Hello,
                 <Box component={"span"} color={"#1e3a8a"} fontWeight={"bold"}>
-                  {`${currentUser.username}!`} <Box component={"br"} />
+                  {`${currentUser?.username}!`} <Box component={"br"} />
                 </Box>
                 Chat Cloud is ready for you! <Box component={"br"} />
                 Select a friend and spark up a chat! 🔥
