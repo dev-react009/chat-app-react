@@ -92,7 +92,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
       if (selectedChat) {
         sendMessage(selectedChat?.chatRoomId, newMessage);
         setNewMessage("");
-        toggleEmojiPicker();
+        setShowEmojiPicker(false);
         scrollToBottom();
 
       }

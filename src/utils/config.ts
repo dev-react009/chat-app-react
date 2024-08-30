@@ -1,5 +1,5 @@
-// export const baseURL = "https://chat-app-express-tyat.onrender.com/api";
-export const baseURL = "http://localhost:9200/api"
+export const baseURL = "https://chat-app-express-tyat.onrender.com/api";
+// export const baseURL = "http://localhost:9200/api"
 export const endpoints = {
   LOGIN: "auth/login",
   REGISTER: "auth/register",

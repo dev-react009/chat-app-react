@@ -263,8 +263,16 @@ const Sidebar: React.FC<SidebarProps> = ({
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h6" sx={{ padding: 2, textAlign: "left" }}>
-              Chats
+            <Typography
+              variant="h6"
+              sx={{
+                padding: 2,
+                textAlign: "left",
+                fontFamily: "Sevillana",
+                fontWeight: "bold",
+              }}
+            >
+              Chat <Box component={"span"}>Cloud</Box>
             </Typography>
             <IconButton color="inherit" onClick={toggleAdditionalDrawer}>
               <Chat />
@@ -565,7 +573,7 @@ const styles = {
     backgroundColor: "#1e3a8a",
     "&:hover": { backgroundColor: "#1e3a8a", "#listItemText": {} },
   },
-  listItemText: { color: "#ffffff" },
+  listItemText: { color: "#ffffff", fontFamily: "Sevillana" },
   list_Item: {
     display: "flex",
     alignItems: "center",
