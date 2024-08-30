@@ -449,10 +449,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <Avatar
                   sx={styles.avatar}
                   src={"/path/to/profile-pic.jpg"}
-                  alt={item.username}
+                  alt={item?.username}
                 />
                 <ListItemText
-                  primary={item.username}
+                  primary={item?.username}
                   sx={styles.list_Item_Text}
                 />
               </ListItem>
@@ -471,10 +471,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <Avatar
                     sx={styles.avatar}
                     src={"/path/to/profile-pic.jpg"}
-                    alt={friend.username}
+                    alt={friend?.username}
                   />
                   <ListItemText
-                    primary={friend.username}
+                    primary={friend?.username}
                     sx={styles.list_Item_Text}
                   />
                 </ListItem>

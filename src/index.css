@@ -12,6 +12,13 @@ code {
     monospace;
 }
 
+.custom-emoji-picker {
+  /* background-color: #282c34;  */
+  border-radius: 10px;       
+  border: 1px solid #ccc;     
+  padding: 10px;             
+}
+
 @keyframes sparkle {
   0% {
     opacity: 1;

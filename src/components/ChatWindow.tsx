@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -20,8 +20,11 @@ import { useTheme } from "@mui/material/styles";
 import { AddComment,  MoreVert, Search } from "@mui/icons-material";
 import Cookies from "js-cookie";
 import useSocket from "../utils/socket";
-import { RootState } from "../redux/store";
 import { formatTimestamp } from "../utils/timeStamp";
+// import { Picker } from 'emoji-mart';
+// import 'emoji-mart/react/css/emoji-mart.css';
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
 interface ChatWindowProps {
   selectedChat: ChatType;
@@ -31,9 +34,12 @@ interface ChatWindowProps {
   handleNewMessage: (message: any) => void;
 }
 
+type Emoji = {
+  native: string;
+};
+
 const userCookie = Cookies.get("user");
 const currentUser = userCookie ? JSON.parse(userCookie) : null;
-
 const ChatWindow: React.FC<ChatWindowProps> = React.memo(
   ({
     selectedChat,
@@ -49,6 +55,17 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const [user, setUser] = useState<string | null>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState<Boolean>(false);
+
+
+
+    const toggleEmojiPicker = useCallback(() => {
+      setShowEmojiPicker(!showEmojiPicker);
+    },[showEmojiPicker])
+
+    const handleEmojiSelect = useCallback((emoji: Emoji) => {
+      setNewMessage((prevMessage) => prevMessage + emoji.native);
+    },[]);
 
     useEffect(() => {
       if (!socket) {
@@ -75,7 +92,9 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
       if (selectedChat) {
         sendMessage(selectedChat?.chatRoomId, newMessage);
         setNewMessage("");
+        toggleEmojiPicker();
         scrollToBottom();
+
       }
     };
 
@@ -95,7 +114,6 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
       scrollToBottom();
     }, [selectedChat?.conversation]);
 
-    console.log(selectedChat?.conversation);
     return (
       <Box
         sx={{
@@ -195,12 +213,11 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
 
                   <Box
                     sx={{
-                      // width:"100%",
                       textAlign: "left",
-                      borderRadius: "5px",
-                      // entry.sender === currentUser?.userId
-                      //   ? "25px 0px 25px 25px"
-                      //   : "0px 25px 25px 25px",
+                      borderRadius:
+                        entry.sender === currentUser?.userId
+                          ? "10px 0px 10px 10px"
+                          : "0px 10px 10px 10px",
                       minWidth: isSmallScreen
                         ? "30%"
                         : { sm: "30%", md: "40%", lg: "8%" },
@@ -222,14 +239,19 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
                           : "#000000",
                       position: "relative",
                       wordBreak: "break-word",
-                      boxShadow: 1,
+                      boxShadow: 5,
                       p: 0.2,
                     }}
                   >
                     <Stack direction={"column"} width={"100%"}>
                       <Typography
                         variant="body2"
-                        sx={{ fontSize: "13px", pl: 1,pr:1,whiteSpace: "pre-wrap" }}
+                        sx={{
+                          fontSize: "13px",
+                          pl: 1,
+                          pr: 1,
+                          whiteSpace: "pre-wrap",
+                        }}
                       >
                         {entry.content}
                       </Typography>
@@ -286,6 +308,15 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
             </Stack>
           )}
         </Box>
+        {showEmojiPicker && (
+          <Box sx={styles.pickerContainer}>
+            <Picker
+              data={data}
+              onEmojiSelect={handleEmojiSelect}
+              className="custom-emoji-picker"
+            />
+          </Box>
+        )}
         {selectedChat && (
           <Box
             component={"form"}
@@ -309,7 +340,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <IconButton color="default">
+                    <IconButton color="default" onClick={toggleEmojiPicker}>
                       <EmojiEmotionsIcon />
                     </IconButton>
                   </InputAdornment>
@@ -345,3 +376,13 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
 );
 
 export default ChatWindow;
+
+
+const styles = {
+  pickerContainer: {
+    position: 'absolute',
+    bottom: '70px',
+    right: '20px',
+    zIndex: 1000,
+  },
+}

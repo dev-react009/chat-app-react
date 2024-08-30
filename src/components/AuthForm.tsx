@@ -111,8 +111,8 @@ const AuthForm: React.FC<AuthFormProps> = ({
           onChange={handlerChange}
           autoComplete="current-username"
           autoFocus={formData.username !== ""}
-          error={!!errors.username}
-          helperText={errors.username}
+          error={!!errors?.username}
+          helperText={errors?.username}
           sx={inputStyles}
         />
       )}
@@ -193,27 +193,80 @@ const AuthForm: React.FC<AuthFormProps> = ({
         fullWidth
         variant="contained"
         color="primary"
-        disabled={loadingAction===("pending" || "reject") }
+        disabled={loadingAction === ("pending" || "reject")}
+        // sx={{
+        //   mt: 2,
+        //   mb: 2,
+        //   py: 1.5,
+        //   background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
+        //   borderRadius: 3,
+        //   fontWeight: "bold",
+        //   fontSize: "0.8rem",
+        //   textTransform: "none",
+        //   transition: "all 2s",
+        //   boxShadow: "0 4px 14px rgba(0, 118, 255, 0.39)",
+        //   "&:hover": {
+        //     background: "linear-gradient(90deg, #2575fc 0%, #6a11cb 100%)",
+        //     boxShadow: "0 6px 20px rgba(0, 118, 255, 0.5)",
+        //     transform: "translateY(-8px)",
+        //     transition: "all 1s ease-in-out",
+        //   },
+        // }}
         sx={{
-          mt: 2,
-          mb: 2,
-          py: 1.5,
-          background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
-          borderRadius: 3,
+          position: "relative",
+          transition: "all 0.3s ease-in-out",
+          boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)",
+          paddingBlock: "0.5rem",
+          paddingInline: "1.25rem",
+          textTransform: "capitalize",
           fontWeight: "bold",
           fontSize: "0.8rem",
-          textTransform: "none",
-          transition: "all 2s",
-          boxShadow: "0 4px 14px rgba(0, 118, 255, 0.39)",
+          background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
+          borderRadius: 3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#ffffff",
+          gap: "10px",
+          outline: "none",
+          overflow: "hidden",
+
+          "& .icon": {
+            width: "24px",
+            height: "24px",
+            transition: "all 0.3s ease-in-out",
+          },
           "&:hover": {
+            borderColor: "#fff9",
             background: "linear-gradient(90deg, #2575fc 0%, #6a11cb 100%)",
-            boxShadow: "0 6px 20px rgba(0, 118, 255, 0.5)",
-            transform: "translateY(-8px)",
-            transition: "all 1s ease-in-out",
+            boxShadow: 5,
+            "&::before": {
+              // animation: "shine 2.5s ease-out infinite",
+            },
+          },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            width: "100px",
+            height: "100%",
+            backgroundImage:
+              "linear-gradient(120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 70%)",
+            top: 0,
+            left: "-100px",
+            opacity: 0.6,
+            animation: "shine 2.5s ease-out infinite",
+          },
+          "@keyframes shine": {
+            "0%": {
+              left: "-100px",
+            },
+            "100%": {
+              left: "100%",
+            },
           },
         }}
       >
-        {(loadingAction==="pending") ? (
+        {loadingAction === "pending" ? (
           <Typography color={"inherit"}>Loading ...</Typography>
         ) : isLogin ? (
           "Access Your Account"

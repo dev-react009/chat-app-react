@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -48,9 +48,10 @@ const ChatsHistory: React.FC<ChatsHistoryProps> = ({
       );
       setFilteredChats(filtered);
     }
-  }, [searchTerm, getRecentChats]);
+  }, [searchTerm, getRecentChats?.chats]);
 
-  const handleStartChat = async (friendId: string,chatId:string) => {
+  const handleStartChat = useCallback(
+  async (friendId: string) => {
 
     setActiveChatId(friendId);
     const response = await dispatch(getFriendChatsAction(friendId));
@@ -65,19 +66,19 @@ const ChatsHistory: React.FC<ChatsHistoryProps> = ({
       onSelectChat(chat);
       setTimeout(()=>{togglePaperVisibility()},1500);
     }
-  };
+  },[dispatch,filteredChats, onSelectChat,togglePaperVisibility])
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
- 
+  console.log(getRecentChats);
 
 
   return (
     <Box sx={{ padding: 2, transition: "all 1s ease-in-out", flexGrow: 3 }}>
       <Typography variant="h6" gutterBottom>
         Chats History
-      </Typography>
-      {/* Search Bar */}
+      </Typography>-
+      
       <Box
         sx={{
           display: "flex",
@@ -130,7 +131,7 @@ const ChatsHistory: React.FC<ChatsHistoryProps> = ({
                   },
                 }}
                 onClick={() =>
-                  handleStartChat(chat?.participants[0]?._id, chat?.id)
+                  handleStartChat(chat?.participants[0]?._id)
                 }
               >
                 <ChatIcon sx={{ color: "#3f51b5", mr: 2 }} />

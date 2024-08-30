@@ -12,8 +12,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Help from "../components/Help";
 import Settings from "../components/Settings";
 import { Notifications } from "../components/Notifications";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../redux/store";
+import { useDispatch, } from "react-redux";
+import { AppDispatch, } from "../redux/store";
 import { toast } from "react-toastify";
 import useSocket from "../utils/socket";
 import Cookies from "js-cookie";
@@ -203,6 +203,7 @@ const Dashboard: React.FC = () => {
 
 
   useEffect(()=>{
+    console.log("recentChats");
       dispatch(getChatsHistoryAction());
   },[dispatch, selectedChat]);
 
