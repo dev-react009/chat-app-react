@@ -290,9 +290,10 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
               <Typography variant="h6" gutterBottom color={"#2f2f2f"}>
                 Hello,
                 <Box component={"span"} color={"#1e3a8a"} fontWeight={"bold"}>
-                  {`${currentUser.username}!`}
+                  {`${currentUser.username}!`} <Box component={"br"} />
                 </Box>
-                ! Ready to start a new chat? Just select a friend!
+                Chat Cloud is ready for you! <Box component={"br"} />
+                Select a friend and spark up a chat! 🔥
               </Typography>
               {isSmallScreen && (
                 <Box
