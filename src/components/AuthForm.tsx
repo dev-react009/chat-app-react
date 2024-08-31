@@ -35,8 +35,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
   showPassword,
   handleClickShowPassword,
 }) => {
-  const { loading } = useSelector((state: RootState) => state.registerReducer);
-  const {loadingAction} = useSelector((state:RootState)=>state.loginReducer)
+  
 
   const { navigateTo } = useCustomNavigate();
   const handleToggle = () => {
@@ -94,11 +93,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
           transition: "all 1s ease-in-out",
         }}
       >
-        {!isLogin && (
-          <Typography color="white" fontSize={"15px"}>
-            {loading === "pending" && "please wait a moment..."}
-          </Typography>
-        )}
       </Box>
       {!isLogin && (
         <TextField
@@ -193,25 +187,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
         fullWidth
         variant="contained"
         color="primary"
-        disabled={loadingAction === ("pending" || "reject")}
-        // sx={{
-        //   mt: 2,
-        //   mb: 2,
-        //   py: 1.5,
-        //   background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
-        //   borderRadius: 3,
-        //   fontWeight: "bold",
-        //   fontSize: "0.8rem",
-        //   textTransform: "none",
-        //   transition: "all 2s",
-        //   boxShadow: "0 4px 14px rgba(0, 118, 255, 0.39)",
-        //   "&:hover": {
-        //     background: "linear-gradient(90deg, #2575fc 0%, #6a11cb 100%)",
-        //     boxShadow: "0 6px 20px rgba(0, 118, 255, 0.5)",
-        //     transform: "translateY(-8px)",
-        //     transition: "all 1s ease-in-out",
-        //   },
-        // }}
         sx={{
           position: "relative",
           transition: "all 0.3s ease-in-out",
@@ -266,13 +241,13 @@ const AuthForm: React.FC<AuthFormProps> = ({
           },
         }}
       >
-        {loadingAction === "pending" ? (
-          <Typography color={"inherit"}>Loading ...</Typography>
-        ) : isLogin ? (
+        
+          
+        { isLogin ? 
           "Access Your Account"
-        ) : (
-          "JoinNow"
-        )}
+        : 
+          "JoinNow"}
+        
       </Button>
       {isLogin ? (
         <Typography

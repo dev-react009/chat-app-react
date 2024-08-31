@@ -2,14 +2,15 @@ import React, { ChangeEvent, useState } from "react";
 import { Grid } from "@mui/material";
 import { IErrors, IFormData, initialValues, values } from "../utils/interface";
 import AuthForm from "../components/AuthForm";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
 import { loginAction } from "../redux/reducers/auth/login/loginReducer";
 import { ToastError, ToastSuccess } from "../utils/toastify";
 import Cookies from "js-cookie";
 
 import useCustomNavigate from "../utils/navigate";
 import SecureRouting from "../utils/SecureRouting";
+import MyLoadingComponent from "../components/loader";
 
 const LoginPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -17,7 +18,9 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<IErrors>(values);
   const {navigateTo} = useCustomNavigate();
-  const [loading, setLoading] = useState(false);
+  const { loadingAction } = useSelector(
+    (state: RootState) => state.loginReducer
+  );
 
   const validateField = (name: string, value: string) => {
     let error = "";
@@ -46,11 +49,10 @@ const LoginPage: React.FC = () => {
     event.preventDefault();
     const response = await dispatch(loginAction(formData));
     const fulfilled = response.payload;
-    console.log(fulfilled)
-    if (fulfilled.status)  {
+    if (fulfilled.status===true)  {
+      navigateTo("/dashboard")
       ToastSuccess(fulfilled?.message);
       setFormData(initialValues);
-      navigateTo("/dashboard")
       const expirationTime = new Date(new Date().getTime() + 24 * 60* 60 * 1000);
       Cookies.set("token", fulfilled.token, { expires: expirationTime });
       Cookies.set('user',JSON.stringify(fulfilled.data))
@@ -87,7 +89,7 @@ const LoginPage: React.FC = () => {
           padding: "10px",
         }}
       >
-        <AuthForm
+        {(loadingAction==="pending")?(<MyLoadingComponent/>):( <AuthForm
           title="Join the conversation the never ends"
           isLogin
           onSubmit={handleLoginSubmit}
@@ -96,7 +98,7 @@ const LoginPage: React.FC = () => {
           showPassword={showPassword}
           handleClickShowPassword={handleClickShowPassword}
           errors={errors}
-        />
+        />)}
       </Grid>
     </Grid>
   );

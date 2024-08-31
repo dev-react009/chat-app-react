@@ -2,14 +2,13 @@ import React, { ChangeEvent, useState } from "react";
 import { Box, Grid } from "@mui/material";
 import AuthForm from "../components/AuthForm";
 import { IErrors, IFormData, initialValues, values } from "../utils/interface";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
 import { registerAction } from "../redux/reducers/auth/register/registerReducer";
 import { toast } from "react-toastify";
 import useCustomNavigate from "../utils/navigate";
-// import asset from "../assests/asset-login.png";
-// import assest from"../assests/asset-c.png";
 import assest from"../assests/asses-reg.jpg";
+import MyLoadingComponent from "../components/loader";
 
 
 
@@ -19,9 +18,8 @@ const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState<IFormData>(initialValues);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<IErrors>(values);
-
   const dispatch = useDispatch<AppDispatch>();
-
+const { loading } = useSelector((state: RootState) => state.registerReducer);
   const validateField = (name: string, value: string) => {
     let error = "";
     switch (name) {
@@ -38,6 +36,7 @@ const RegisterPage: React.FC = () => {
           error = "Password must be at least 6 characters long";
         break;
       case "mobile":
+        if(value.length>10) return;
         if (!value) error = "Cannot be Empty";
         else if (!/^[6-9]\d{9}$/.test(value))
           error = "Must be 10 characters & starts with [6-9]";
@@ -91,7 +90,8 @@ const RegisterPage: React.FC = () => {
     event.preventDefault();
     const response = await dispatch(registerAction(formData));
     const fulfilled = response.payload;
-    if (fulfilled.status) {
+    
+    if (fulfilled.status===true) {
       navigateTo("/");
       setFormData(initialValues);
       toast.success(response.payload.message);
@@ -105,7 +105,7 @@ const RegisterPage: React.FC = () => {
       alignItems="center"
       sx={{
         transition: "all 1s",
-        height:"100vh",
+        height: "100vh",
         background:
           "linear-gradient(125deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%)",
       }}
@@ -124,15 +124,19 @@ const RegisterPage: React.FC = () => {
           padding: "20px",
         }}
       >
-        <AuthForm
-          title="Ready to connect? Register now and start chatting instantly!"
-          onSubmit={handleRegisterSubmit}
-          formData={formData}
-          handlerChange={handleChangeFormData}
-          showPassword={showPassword}
-          handleClickShowPassword={handleClickShowPassword}
-          errors={errors}
-        />
+        {loading ==="pending" ? (
+          <MyLoadingComponent />
+        ) : (
+          <AuthForm
+            title="Ready to connect? Register now and start chatting instantly!"
+            onSubmit={handleRegisterSubmit}
+            formData={formData}
+            handlerChange={handleChangeFormData}
+            showPassword={showPassword}
+            handleClickShowPassword={handleClickShowPassword}
+            errors={errors}
+          />
+        )}
       </Grid>
 
       {/* Right side - Image */}

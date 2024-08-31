@@ -38,8 +38,7 @@ type Emoji = {
   native: string;
 };
 
-const userCookie = Cookies.get("user");
-const currentUser = userCookie ? JSON.parse(userCookie) : null;
+
 const ChatWindow: React.FC<ChatWindowProps> = React.memo(
   ({
     selectedChat,
@@ -51,9 +50,10 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
     const theme = useTheme();
     // const socket = useSocket("http://localhost:9200");
     const socket = useSocket("https://chat-app-express-tyat.onrender.com");
+    const userCookie = Cookies.get("user");
+const currentUser = userCookie ? JSON.parse(userCookie) : null;
     const [newMessage, setNewMessage] = useState("");
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-    const [user, setUser] = useState<string | null>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState<Boolean>(false);
 
@@ -105,10 +105,8 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(
           chatContainerRef.current.scrollHeight;
       }
     };
-
-    useEffect(() => {
-      setUser(currentUser?.userId || null);
-    }, []);
+console.log(currentUser);
+  
 
     useEffect(() => {
       scrollToBottom();
